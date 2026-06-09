@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NorthSouth Coffee — Loyalty Intelligence</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --espresso: #1A0F0A;
+    --roast:    #2E1A0E;
+    --crema:    #C8965A;
+    --steam:    #F5EFE6;
+    --milk:     #FBF8F4;
+    --fog:      #E8DFD4;
+    --sage:     #6B7F6E;
+    --alert:    #C0392B;
+    --success:  #2E7D52;
+    --pending:  #C8965A;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--milk);
+    color: var(--espresso);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--espresso);
+    padding: 0 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    color: var(--steam);
+    letter-spacing: .02em;
+  }
+  .logo-mark {
+    width: 32px; height: 32px;
+    background: var(--crema);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .badge {
+    background: var(--roast);
+    border: 1px solid #3a2212;
+    color: var(--crema);
+    font-family: 'DM Mono', monospace;
+    font-size: .7rem;
+    padding: .2rem .6rem;
+    border-radius: 4px;
+    letter-spacing: .08em;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, var(--espresso) 0%, var(--roast) 60%, #3d2010 100%);
+    padding: 4rem 2.5rem 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(200,150,90,.15) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .hero-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: .72rem;
+    letter-spacing: .14em;
+    color: var(--crema);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 900;
+    color: var(--steam);
+    line-height: 1.15;
+    max-width: 620px;
+    margin-bottom: 1rem;
+  }
+  .hero h1 em {
+    color: var(--crema);
+    font-style: normal;
+  }
+  .hero-sub {
+    color: #b0a090;
+    font-size: .95rem;
+    max-width: 520px;
+    margin-bottom: 2rem;
+  }
+  .stat-row {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .stat {
+    display: flex;
+    flex-direction: column;
+  }
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--crema);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: .75rem;
+    color: #907860;
+    letter-spacing: .04em;
+    margin-top: .2rem;
+  }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem 4rem;
+  }
+
+  /* ── AGENTS PIPELINE ── */
+  .pipeline-label {
+    font-family: 'DM Mono', monospace;
+    font-size: .72rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: #907860;
+    margin-bottom: 1.25rem;
+  }
+
+  .pipeline {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+    margin-bottom: 2.5rem;
+    border: 1.5px solid var(--fog);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .agent-card {
+    background: white;
+    padding: 1.1rem 1rem;
+    border-right: 1.5px solid var(--fog);
+    position: relative;
+    transition: background .2s;
+  }
+  .agent-card:last-child { border-right: none; }
+  .agent-card.active { background: #fffaf5; }
+  .agent-card.done { background: #f4faf6; }
+  .agent-card.error { background: #fdf4f4; }
+
+  .agent-num {
+    font-family: 'DM Mono', monospace;
+    font-size: .65rem;
+    color: #bbb;
+    margin-bottom: .4rem;
+    letter-spacing: .08em;
+  }
+  .agent-icon { font-size: 1.4rem; margin-bottom: .4rem; }
+  .agent-name {
+    font-weight: 600;
+    font-size: .82rem;
+    color: var(--espresso);
+    margin-bottom: .2rem;
+    line-height: 1.3;
+  }
+  .agent-role {
+    font-size: .72rem;
+    color: #999;
+    line-height: 1.4;
+  }
+  .agent-status {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    font-family: 'DM Mono', monospace;
+    font-size: .62rem;
+    margin-top: .6rem;
+    padding: .15rem .45rem;
+    border-radius: 3px;
+    letter-spacing: .06em;
+  }
+  .status-idle    { background: var(--fog); color: #888; }
+  .status-running { background: #fff3e0; color: #c87a20; }
+  .status-done    { background: #e8f5ed; color: var(--success); }
+  .status-error   { background: #fdecea; color: var(--alert); }
+  .status-waiting { background: #f0f0f0; color: #aaa; }
+
+  .pulse { animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  /* ── CONTROLS ── */
+  .controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .7rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .18s;
+    letter-spacing: .01em;
+  }
+  .btn-primary {
+    background: var(--espresso);
+    color: var(--steam);
+  }
+  .btn-primary:hover { background: var(--roast); transform: translateY(-1px); }
+  .btn-primary:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+  .btn-secondary {
+    background: white;
+    color: var(--espresso);
+    border: 1.5px solid var(--fog);
+  }
+  .btn-secondary:hover { border-color: var(--crema); }
+  .btn-secondary:disabled { opacity: .4; cursor: not-allowed; }
+
+  .run-info {
+    font-size: .8rem;
+    color: #aaa;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* ── RESULTS ── */
+  .results-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  @media(max-width: 700px) {
+    .results-grid { grid-template-columns: 1fr; }
+    .pipeline { grid-template-columns: 1fr 1fr; }
+  }
+
+  .result-card {
+    background: white;
+    border: 1.5px solid var(--fog);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .result-card.full-width { grid-column: 1 / -1; }
+
+  .result-header {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .9rem 1.2rem;
+    border-bottom: 1.5px solid var(--fog);
+    background: #fafafa;
+  }
+  .result-header-icon { font-size: 1.1rem; }
+  .result-header-title {
+    font-weight: 600;
+    font-size: .85rem;
+    flex: 1;
+  }
+  .result-header-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: .65rem;
+    color: #aaa;
+    letter-spacing: .06em;
+  }
+
+  .result-body {
+    padding: 1.2rem;
+    font-size: .84rem;
+    line-height: 1.7;
+    color: #333;
+    min-height: 80px;
+  }
+
+  .result-placeholder {
+    color: #ccc;
+    font-style: italic;
+    font-size: .82rem;
+  }
+
+  .result-body h4 {
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--espresso);
+    margin: .8rem 0 .3rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+  .result-body h4:first-child { margin-top: 0; }
+
+  .result-body ul {
+    padding-left: 1.2rem;
+    margin-bottom: .5rem;
+  }
+  .result-body ul li { margin-bottom: .3rem; }
+
+  /* ── FINAL REPORT ── */
+  .report-card {
+    background: var(--espresso);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-top: 1.5rem;
+  }
+  .report-header {
+    padding: 1.4rem 1.8rem;
+    border-bottom: 1px solid #2e1a0e;
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+  }
+  .report-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    color: var(--steam);
+  }
+  .report-body {
+    padding: 1.6rem 1.8rem;
+    color: #c8b8a0;
+    font-size: .88rem;
+    line-height: 1.8;
+  }
+  .report-body h3 {
+    color: var(--crema);
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    margin: 1.2rem 0 .5rem;
+  }
+  .report-body h3:first-child { margin-top: 0; }
+  .report-body ul { padding-left: 1.4rem; }
+  .report-body ul li { margin-bottom: .4rem; }
+  .report-body strong { color: var(--steam); }
+
+  .report-placeholder {
+    color: #4a3520;
+    font-style: italic;
+    padding: 2rem 1.8rem;
+    text-align: center;
+    font-size: .85rem;
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-wrap {
+    background: var(--fog);
+    border-radius: 4px;
+    height: 4px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--crema), #e8a060);
+    border-radius: 4px;
+    transition: width .5s ease;
+    width: 0%;
+  }
+
+  /* ── STREAM TEXT ── */
+  .stream-text::after {
+    content: '▊';
+    animation: blink .7s infinite;
+    color: var(--crema);
+    font-size: .75em;
+  }
+  @keyframes blink { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-mark">☕</div>
+    NorthSouth Coffee
+  </div>
+  <span class="badge">LOYALTY INTELLIGENCE</span>
+</header>
+
+<div class="hero">
+  <div class="hero-eyebrow">Diagnostic Workflow · 5 AI Agents</div>
+  <h1>Fix the <em>loyalty drop</em><br>before it becomes a crisis.</h1>
+  <p class="hero-sub">Five specialised agents analyse the 40% engagement collapse — from customer psychology to competitive positioning — and produce an actionable recovery plan.</p>
+  <div class="stat-row">
+    <div class="stat">
+      <span class="stat-num">40%</span>
+      <span class="stat-label">Engagement drop</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">120</span>
+      <span class="stat-label">Locations affected</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">6mo</span>
+      <span class="stat-label">Decline window</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">5</span>
+      <span class="stat-label">AI agents deployed</span>
+    </div>
+  </div>
+</div>
+
+<main>
+  <p class="pipeline-label">Agent pipeline</p>
+  <div class="pipeline" id="pipeline">
+    <div class="agent-card" id="card-0">
+      <div class="agent-num">01</div>
+      <div class="agent-icon">🔍</div>
+      <div class="agent-name">Customer Behaviour Analyst</div>
+      <div class="agent-role">Drop-off patterns & psychological barriers</div>
+      <span class="agent-status status-idle" id="status-0">IDLE</span>
+    </div>
+    <div class="agent-card" id="card-1">
+      <div class="agent-num">02</div>
+      <div class="agent-icon">📊</div>
+      <div class="agent-name">Data & Metrics Auditor</div>
+      <div class="agent-role">KPIs, cohort analysis & benchmarks</div>
+      <span class="agent-status status-waiting" id="status-1">WAITING</span>
+    </div>
+    <div class="agent-card" id="card-2">
+      <div class="agent-num">03</div>
+      <div class="agent-icon">🏆</div>
+      <div class="agent-name">Competitive Intel Agent</div>
+      <div class="agent-role">What rivals do better</div>
+      <span class="agent-status status-waiting" id="status-2">WAITING</span>
+    </div>
+    <div class="agent-card" id="card-3">
+      <div class="agent-num">04</div>
+      <div class="agent-icon">🎯</div>
+      <div class="agent-name">Programme Designer</div>
+      <div class="agent-role">Redesigned loyalty mechanics</div>
+      <span class="agent-status status-waiting" id="status-3">WAITING</span>
+    </div>
+    <div class="agent-card" id="card-4">
+      <div class="agent-num">05</div>
+      <div class="agent-icon">🗺️</div>
+      <div class="agent-name">Implementation Strategist</div>
+      <div class="agent-role">90-day rollout & success metrics</div>
+      <span class="agent-status status-waiting" id="status-4">WAITING</span>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-primary" id="runBtn" onclick="runWorkflow()">
+      ▶ Run Full Diagnostic
+    </button>
+    <button class="btn btn-secondary" id="resetBtn" onclick="resetAll()" disabled>
+      ↺ Reset
+    </button>
+    <span class="run-info" id="runInfo">5 agents · sequential pipeline</span>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <div class="results-grid" id="resultsGrid">
+    <div class="result-card" id="result-0">
+      <div class="result-header">
+        <span class="result-header-icon">🔍</span>
+        <span class="result-header-title">Customer Behaviour Analysis</span>
+        <span class="result-header-tag">AGENT 01</span>
+      </div>
+      <div class="result-body result-placeholder" id="body-0">Awaiting agent run…</div>
+    </div>
+    <div class="result-card" id="result-1">
+      <div class="result-header">
+        <span class="result-header-icon">📊</span>
+        <span class="result-header-title">Data & Metrics Audit</span>
+        <span class="result-header-tag">AGENT 02</span>
+      </div>
+      <div class="result-body result-placeholder" id="body-1">Awaiting agent run…</div>
+    </div>
+    <div class="result-card" id="result-2">
+      <div class="result-header">
+        <span class="result-header-icon">🏆</span>
+        <span class="result-header-title">Competitive Intelligence</span>
+        <span class="result-header-tag">AGENT 03</span>
+      </div>
+      <div class="result-body result-placeholder" id="body-2">Awaiting agent run…</div>
+    </div>
+    <div class="result-card" id="result-3">
+      <div class="result-header">
+        <span class="result-header-icon">🎯</span>
+        <span class="result-header-title">Redesigned Programme Mechanics</span>
+        <span class="result-header-tag">AGENT 04</span>
+      </div>
+      <div class="result-body result-placeholder" id="body-3">Awaiting agent run…</div>
+    </div>
+    <div class="result-card full-width" id="result-4">
+      <div class="result-header">
+        <span class="result-header-icon">🗺️</span>
+        <span class="result-header-title">Implementation Roadmap</span>
+        <span class="result-header-tag">AGENT 05</span>
+      </div>
+      <div class="result-body result-placeholder" id="body-4">Awaiting agent run…</div>
+    </div>
+  </div>
+
+  <div class="report-card" id="reportCard">
+    <div class="report-header">
+      <span style="font-size:1.3rem">📋</span>
+      <span class="report-title">Executive Summary — Loyalty Recovery Plan</span>
+    </div>
+    <div class="report-placeholder" id="reportBody">
+      Run the diagnostic workflow to generate the executive summary.
+    </div>
+  </div>
+
+</main>
+
+<script>
+const AGENTS = [
+  {
+    name: "Customer Behaviour Analyst",
+    prompt: `You are a senior customer behaviour analyst for NorthSouth Coffee, a 120-location chain. 
+Their loyalty programme has seen a 40% engagement drop in 6 months. Customers sign up to get a free drink but stop using the app after that.
+
+Analyse in detail:
+1. The psychology behind "free drink and leave" behaviour (what drives this specific pattern)
+2. The top 3–5 friction points that kill continued engagement in coffee loyalty apps
+3. Emotional and habitual drivers coffee drinkers actually respond to
+4. What the data pattern (sign up spike → immediate cliff drop) tells us diagnostically
+
+Be specific and actionable. Format with clear headers using plain text headers like "PSYCHOLOGY OF DROP-OFF:", etc. No markdown symbols. Write 300–400 words.`
+  },
+  {
+    name: "Data & Metrics Auditor",
+    prompt: `You are a data analyst for NorthSouth Coffee. A prior agent found key behavioural patterns in their loyalty programme collapse (40% drop, 120 locations, 6 months).
+
+Your job:
+1. Identify the 6 critical KPIs they must track to understand and reverse this (they likely aren't tracking all of them)
+2. Describe the cohort analysis they should run (first-week behaviour vs 30-day vs 90-day)
+3. Identify what a healthy benchmark looks like for coffee loyalty programmes (industry context)
+4. Flag the 2–3 data gaps that are probably hiding the real cause
+
+Format with clear sections. Be precise with numbers and metrics. 300–400 words. No markdown symbols.`
+  },
+  {
+    name: "Competitive Intelligence Agent",
+    prompt: `You are a competitive intelligence specialist for NorthSouth Coffee. Their loyalty programme has lost 40% engagement.
+
+Analyse:
+1. What Starbucks Rewards does structurally that drives habitual engagement (not just points — the emotional and UX mechanics)
+2. What smaller, successful coffee chains (Blue Bottle, Pret, Tim Hortons, etc.) do differently from big chains
+3. The 3 biggest structural mistakes coffee loyalty programmes make that NorthSouth is likely making
+4. One surprising or counterintuitive tactic from outside the coffee industry that could work here
+
+Be specific about mechanics, not vague strategy. 300–400 words. No markdown symbols.`
+  },
+  {
+    name: "Programme Designer",
+    prompt: `You are a loyalty programme designer for NorthSouth Coffee. Three specialist agents have already diagnosed the problem: customers sign up for a free drink then disengage. 40% drop over 6 months across 120 locations.
+
+Design a completely refreshed loyalty programme:
+1. Core earning mechanic (go beyond simple points — consider streaks, surprise rewards, social elements)
+2. Redemption redesign (what, when, how often should rewards hit to maximise habit formation)
+3. Personalisation layer (what data to use and how to make customers feel known)
+4. Gamification elements (specific to coffee-buying habits — morning routines, weekday patterns)
+5. One bold, distinctive feature no other coffee chain currently offers
+
+Name the programme. Make it feel real. 350–450 words. No markdown symbols.`
+  },
+  {
+    name: "Implementation Strategist",
+    prompt: `You are the implementation lead for NorthSouth Coffee's loyalty programme recovery. The programme redesign is complete. Now create the rollout plan.
+
+Deliver:
+1. A 90-day phased rollout plan (Phase 1: weeks 1–4, Phase 2: weeks 5–8, Phase 3: weeks 9–12) — be specific about what launches in each phase
+2. The 5 success metrics to track, with specific targets for 90 days out
+3. The top 3 risks to the rollout and how to mitigate each
+4. Staff training priorities (baristas are the human touchpoint — this is critical)
+5. A go/no-go checklist for launch day
+
+Be operational and specific. This is a 120-location rollout, so address the scale. 400–450 words. No markdown symbols.`
+  }
+];
+
+let running = false;
+let results = [];
+
+function setStatus(i, type, label) {
+  const el = document.getElementById('status-' + i);
+  const card = document.getElementById('card-' + i);
+  el.className = 'agent-status status-' + type;
+  el.innerHTML = type === 'running' ? `<span class="pulse">●</span> ${label}` : label;
+  card.className = 'agent-card' + (type === 'running' ? ' active' : type === 'done' ? ' done' : type === 'error' ? ' error' : '');
+}
+
+function setProgress(pct) {
+  document.getElementById('progressBar').style.width = pct + '%';
+}
+
+async function callClaude(prompt) {
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 1000,
+      messages: [{ role: "user", content: prompt }]
+    })
+  });
+  if (!response.ok) throw new Error('API error ' + response.status);
+  const data = await response.json();
+  return data.content.map(b => b.text || '').join('\n');
+}
+
+function formatOutput(text) {
+  // Convert plain text sections to styled HTML
+  let html = text
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/\n/g, '<br>');
+  // Bold ALL-CAPS headers ending with colon
+  html = html.replace(/([A-Z][A-Z\s&\-\/]{3,}):/g, '<strong>$1:</strong>');
+  return '<p>' + html + '</p>';
+}
+
+async function runWorkflow() {
+  if (running) return;
+  running = true;
+  results = [];
+
+  document.getElementById('runBtn').disabled = true;
+  document.getElementById('resetBtn').disabled = true;
+  document.getElementById('runInfo').textContent = 'Running diagnostic…';
+
+  // Reset all
+  for (let i = 0; i < 5; i++) {
+    setStatus(i, i === 0 ? 'idle' : 'waiting', i === 0 ? 'IDLE' : 'WAITING');
+    const body = document.getElementById('body-' + i);
+    body.innerHTML = '<span class="result-placeholder">Awaiting agent run…</span>';
+    body.className = 'result-body result-placeholder';
+  }
+  document.getElementById('reportBody').innerHTML = '<div class="report-placeholder">Generating executive summary…</div>';
+  setProgress(0);
+
+  for (let i = 0; i < AGENTS.length; i++) {
+    setStatus(i, 'running', 'RUNNING');
+    setProgress((i / 5) * 90);
+
+    const body = document.getElementById('body-' + i);
+    body.className = 'result-body stream-text';
+    body.innerHTML = '<em style="color:#ccc;font-size:.82rem">Agent thinking…</em>';
+
+    try {
+      const text = await callClaude(AGENTS[i].prompt);
+      results.push(text);
+      body.className = 'result-body';
+      body.innerHTML = formatOutput(text);
+      setStatus(i, 'done', 'DONE');
+      // Mark next as idle if not last
+      if (i < 4) setStatus(i + 1, 'idle', 'IDLE');
+      setProgress(((i + 1) / 5) * 90);
+    } catch (err) {
+      results.push('');
+      body.className = 'result-body';
+      body.innerHTML = `<span style="color:var(--alert)">Agent error: ${err.message}. Check your API key and try again.</span>`;
+      setStatus(i, 'error', 'ERROR');
+    }
+  }
+
+  // Generate executive summary
+  document.getElementById('runInfo').textContent = 'Generating executive summary…';
+  setProgress(92);
+
+  try {
+    const summaryPrompt = `You are the Chief Strategy Officer of NorthSouth Coffee. 
+Five specialist agents have just completed a diagnostic of the loyalty programme collapse (40% engagement drop, 120 locations, 6 months).
+
+Here are their findings:
+
+AGENT 1 - Customer Behaviour:
+${results[0] || 'Not available'}
+
+AGENT 2 - Data & Metrics:
+${results[1] || 'Not available'}
+
+AGENT 3 - Competitive Intelligence:
+${results[2] || 'Not available'}
+
+AGENT 4 - Programme Design:
+${results[3] || 'Not available'}
+
+AGENT 5 - Implementation:
+${results[4] || 'Not available'}
+
+Write a tight, executive-level summary (400–500 words) that:
+1. States the root cause of the loyalty collapse in one crisp sentence
+2. Summarises the 4–5 most important findings across all agents
+3. Names the redesigned programme and its 3 defining features
+4. States the single most important action to take in the next 30 days
+5. Ends with a confidence assessment: is this fixable, and how quickly?
+
+Use headers: ROOT CAUSE:, KEY FINDINGS:, THE NEW PROGRAMME:, IMMEDIATE PRIORITY:, PROGNOSIS:
+Write for a board-level audience. No markdown. Direct, authoritative, concise.`;
+
+    const summary = await callClaude(summaryPrompt);
+    setProgress(100);
+    document.getElementById('reportBody').className = 'report-body';
+    document.getElementById('reportBody').innerHTML = formatOutput(summary);
+  } catch (err) {
+    document.getElementById('reportBody').innerHTML = `<div class="report-placeholder" style="color:#c87a20">Could not generate summary: ${err.message}</div>`;
+  }
+
+  running = false;
+  document.getElementById('runBtn').disabled = false;
+  document.getElementById('resetBtn').disabled = false;
+  document.getElementById('runInfo').textContent = 'Diagnostic complete — 5 agents ran successfully';
+}
+
+function resetAll() {
+  if (running) return;
+  results = [];
+  for (let i = 0; i < 5; i++) {
+    setStatus(i, i === 0 ? 'idle' : 'waiting', i === 0 ? 'IDLE' : 'WAITING');
+    const body = document.getElementById('body-' + i);
+    body.className = 'result-body result-placeholder';
+    body.innerHTML = 'Awaiting agent run…';
+  }
+  document.getElementById('reportBody').className = '';
+  document.getElementById('reportBody').innerHTML = '<div class="report-placeholder">Run the diagnostic workflow to generate the executive summary.</div>';
+  setProgress(0);
+  document.getElementById('runInfo').textContent = '5 agents · sequential pipeline';
+  document.getElementById('resetBtn').disabled = true;
+}
+</script>
+</body>
+</html>
